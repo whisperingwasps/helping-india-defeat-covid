@@ -44,7 +44,9 @@ with form:
             "Enter the attendant contact number*"
         )
         session_state.city = st.selectbox(
-            "Select City*", ["Delhi", "Mumbai", "Chennai", "Bengaluru", "Other"], key=2
+            "Select City/Location*",
+            ["Delhi", "Mumbai", "Chennai", "Bengaluru", "Other"],
+            key=2,
         )
 
         session_state.spo2 = st.selectbox(
@@ -75,9 +77,30 @@ if submitted:
         and session_state.address
     ):
         with st.spinner("Posting a tweet"):
-            public_tweets = post_a_tweet()
-            for each_tweet in public_tweets:
-                st.success("Tweet is : " + str(each_tweet))
+            tweet_info = {
+                "patient_name": session_state.patient_name,
+                "patient_age": session_state.patient_age,
+                "location": session_state.city,
+                "service_required": session_state.service,
+                "current_spo2_level": session_state.spo2,
+                "attendant_name": session_state.attendant_name,
+                "attendant_contact_number": session_state.contact_number,
+                "address": session_state.address,
+            }
+            if session_state.city == "Other":
+                tweet_info["city"] = session_state.other_city
+
+            tweet_post_url, tweet_to_post = post_a_tweet(tweet_info)
+
+            if tweet_post_url:
+                st.success(
+                    "We have posted this [Tweet]("
+                    + tweet_post_url
+                    + ") on Twitter : \n  "
+                    + tweet_to_post
+                    + ". \n"
+                    + " Please follow the tweet on Twitter for updates."
+                )
 
     else:
         st.error("All the fields with * are mandatory.")
