@@ -1,5 +1,7 @@
+from __future__ import unicode_literals
 import tweepy
 import os
+import sys
 
 WILD_CARDS = [
     "patient_name",
@@ -14,18 +16,51 @@ WILD_CARDS = [
 TWEET_FORMAT = "Patient Name: patient_name\nPatient age: patient_age\nLocation: location\nService Required: service_required\nCurrent SpO2: current_spo2_level\nAttendant Name: attendant_name\nContact Number: attendant_contact_number\nAddress: address\n#HelpingIndiaBreathe\n**Automated using https://"
 
 
+def get_env_var_from_os(env_var_name):
+    env_var_val = None
+    if env_var_name:
+        raw_env_var_val = os.getenv(env_var_name)
+
+        if raw_env_var_val:
+            env_var_val = raw_env_var_val
+
+    return env_var_val
+
+
+def get_mandatory_env_variables():
+
+    got_all_env_vars = False
+    consumer_key = get_env_var_from_os("CONSUMER_KEY")
+    print(consumer_key)
+    consumer_secret = get_env_var_from_os("CONSUMER_SECRET")
+    print(consumer_secret)
+
+    access_token = get_env_var_from_os("ACCESS_TOKEN")
+    print(access_token)
+    access_token_secret = get_env_var_from_os("ACCESS_TOKEN_SECRET")
+    print(access_token_secret)
+
+    if None not in (consumer_key, consumer_secret, access_token, access_token_secret):
+        got_all_env_vars = True
+
+    return got_all_env_vars
+
+
 def post_a_tweet(info_to_tweet):
     tweet_post_url = None
     public_tweets = None
-    consumer_key = os.getenv("CONSUMER_KEY")
-    print(consumer_key)
-    consumer_secret = os.getenv("CONSUMER_SECRET")
-    print(consumer_secret)
 
-    access_token = os.getenv("ACCESS_TOKEN")
-    print(access_token)
-    access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
-    print(access_token_secret)
+    got_all_env_vars = get_mandatory_env_variables()
+
+    if got_all_env_vars is False:
+        sys.exit(
+            "Please set all mandatory Twitter Dev Acct Env Variables: CONSUMER_KEY,CONSUMER_SECRET,ACCESS_TOKEN,ACCESS_TOKEN_SECRET"
+        )
+
+    consumer_key = get_env_var_from_os("CONSUMER_KEY")
+    consumer_secret = get_env_var_from_os("CONSUMER_SECRET")
+    access_token = get_env_var_from_os("ACCESS_TOKEN")
+    access_token_secret = get_env_var_from_os("ACCESS_TOKEN_SECRET")
 
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
