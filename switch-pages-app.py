@@ -51,7 +51,7 @@ def pageTwo(sesh):
 
 
 sesh = SessionState.get(curr_page=0)
-PAGES = [pageZero, pageOne, pageTwo]
+PAGES = [pageZero, pageOne, pageTwo, pageThree]
 
 
 def main():
@@ -75,6 +75,8 @@ def main():
         sesh.curr_page = 1
     elif genre == "Give help":
         sesh.curr_page = 2
+    elif genre == "Contribute":
+        sesh.curr_page = 3
 
     st.sidebar.markdown("----------------------------------")
 

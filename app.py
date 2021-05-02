@@ -12,7 +12,9 @@ session_state = SessionState.get(
     spo2="",
     city="",
     service="",
+    plasma_service="",
     other_city="",
+    other_city_chosen="None",
 )
 
 got_all_env_vars = get_mandatory_env_variables()
@@ -35,14 +37,28 @@ st.sidebar.markdown(" ### Navigation")
 st.sidebar.markdown("Choose a page to proceed:")
 page_option = st.sidebar.radio(
     "What do you want us to help you with?",
-    ("Ask for Help", "Find Contacts", "Give help"),
+    ("Ask for Help", "Open-Source Project: Join hands", "Find Contacts", "Give help"),
 )
 if page_option == "Ask for Help":
     session_state.current_page_chosen = 0
 elif page_option == "Find Contacts":
-    session_state.current_page_chosen = 1
+    session_state.current_page_chosen = 2
 elif page_option == "Give help":
+    session_state.current_page_chosen = 2
+elif page_option == "Open-Source Project: Join hands":
     session_state.current_page_chosen = 1
+
+
+st.sidebar.warning(
+    "Disclaimer: Please note that the information on this page is crowdsourced and the maintainers of this site are not liable in case of any false information. Please also note that the maintainers or anyone claiming to be part of this site will not and do not ask for any financial help. This initiative is purely for charitable reasons. "
+)
+
+
+def contribute_page():
+    st.header("Open-Source Project: Join hands")
+    st.info(
+        "This is an open source project based on Python programming language, so feel free to chip-in if you want to, at : [GitHub Repo](https://github.com/whisperingwasps/helping-india-defeat-covid)"
+    )
 
 
 def coming_soon_page():
@@ -51,7 +67,7 @@ def coming_soon_page():
 
 
 def ask_for_help_page():
-    st.header("Ask for Help from India")
+    st.header("Ask for Help from India through Twitter")
     st.subheader("Submit Help Form")
     st.warning(
         "Please fill the below form and we will post a tweet in a format that tags the relevant volunteers and helps in faster response."
@@ -62,7 +78,9 @@ def ask_for_help_page():
         col1, mid, col2 = st.beta_columns([20, 1, 20])
         with col1:
             session_state.patient_name = st.text_input("Enter the patient name*")
-            session_state.patient_age = st.text_input("Enter the patient age*")
+            session_state.patient_age = st.number_input(
+                "Enter the patient age*", min_value=18, max_value=150
+            )
             session_state.service = st.selectbox(
                 "Select service*",
                 [
@@ -75,15 +93,20 @@ def ask_for_help_page():
                 ],
                 key=1,
             )
-            session_state.address = st.text_input("Enter the address*")
-        with col2:
-            session_state.attendant_name = st.text_input("Enter the attendant name*")
-            session_state.contact_number = st.text_input(
-                "Enter the attendant contact number*"
-            )
-            session_state.city = st.selectbox(
-                "Select City/Location*",
-                ["Delhi", "Mumbai", "Chennai", "Bengaluru", "Other"],
+            session_state.plasma_service = st.selectbox(
+                "If chosen Plasma, Select Blood Type*",
+                [
+                    "NA",
+                    "Any",
+                    "A+ve",
+                    "A-ve",
+                    "B+ve",
+                    "B-ve",
+                    "O+ve",
+                    "O-ve",
+                    "AB+ve",
+                    "AB-ve",
+                ],
                 key=2,
             )
 
@@ -98,12 +121,36 @@ def ask_for_help_page():
                 key="spo2",
             )
 
+        with col2:
+            session_state.attendant_name = st.text_input("Enter the attendant name*")
+            session_state.contact_number = st.text_input(
+                "Enter the attendant contact number*"
+            )
+            session_state.city = st.selectbox(
+                "Select City/Location*",
+                ["Delhi", "Mumbai", "Chennai", "Bengaluru", "Other"],
+                key=2,
+            )
+            session_state.other_city = st.text_input(
+                "If chosen Location as Other, Select Location/City name*"
+            )
+
         submitted = st.form_submit_button("Post help on Twitter")
 
     if submitted:
-        if session_state.city == "Other":
-            session_state.other_city = st.text_input("Enter the city*")
-        if (
+
+        if len(session_state.contact_number) < 10:
+            st.error("Attendant Contact Number is invalid. Please check and re-submit.")
+
+        elif len(session_state.city) < 3:
+            st.error("Please enter a valid city name")
+        elif len(session_state.patient_name) < 3:
+            st.error("Please enter a valid patiemt name")
+
+        elif len(session_state.attendant_name) < 3:
+            st.error("Please enter a valid attendant name.")
+
+        elif (
             session_state.patient_name
             and session_state.patient_age
             and session_state.attendant_name
@@ -111,7 +158,7 @@ def ask_for_help_page():
             and session_state.spo2
             and session_state.city
             and session_state.service
-            and session_state.address
+            or session_state.plasma_service
         ):
             with st.spinner("Posting a tweet"):
                 tweet_info = {
@@ -122,10 +169,13 @@ def ask_for_help_page():
                     "current_spo2_level": session_state.spo2,
                     "attendant_name": session_state.attendant_name,
                     "attendant_contact_number": session_state.contact_number,
-                    "address": session_state.address,
                 }
-                if session_state.city == "Other":
-                    tweet_info["city"] = session_state.other_city
+
+                if session_state.service == "Plasma":
+                    tweet_info["plasma_service"] = session_state.plasma_service
+
+                if session_state.city == "Other" and session_state.other_city:
+                    tweet_info["other_city"] = session_state.other_city
 
                 tweet_post_url, tweet_to_post = post_a_tweet(tweet_info)
 
@@ -134,9 +184,9 @@ def ask_for_help_page():
                         "We have posted this [Tweet]("
                         + tweet_post_url
                         + ") on Twitter : "
-                        + "\n"
+                        + "  "
                         + tweet_to_post
-                        + ". \n"
+                        + ".  "
                         + " Please follow the tweet on Twitter for updates."
                     )
 
@@ -145,7 +195,7 @@ def ask_for_help_page():
 
 
 # Main Panel : Show Page chosen
-available_pages = [ask_for_help_page, coming_soon_page]
+available_pages = [ask_for_help_page, contribute_page, coming_soon_page]
 
 page_turning_function = available_pages[session_state.current_page_chosen]
 page_turning_function()

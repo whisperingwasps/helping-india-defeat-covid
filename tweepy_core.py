@@ -3,6 +3,45 @@ import tweepy
 import os
 import sys
 
+HASH_TAGS_BY_LOCATION = {
+    "Bengaluru": [
+        "#Bangalore ",
+        "#BengaluruSOS ",
+        "@BengaluruSOS ",
+        "#CovidIndiaInfo ",
+        "#Covid19IndiaHelp ",
+        "#COVIDEmergency ",
+        "#IndiaNeedsOxygen ",
+    ],
+    "Chennai": [
+        "#Chennai ",
+        "@104_GoTN ",
+        "#BedsForTN ",
+        "#CovidIndiaInfo ",
+        "#Covid19IndiaHelp ",
+        "#COVIDEmergency ",
+        "#IndiaNeedsOxygen ",
+    ],
+    "Delhi": [
+        "#Delhi ",
+        "#CovidIndiaInfo ",
+        "#Covid19IndiaHelp ",
+        "#DelhiNCR ",
+        "@dilipkpandey ",
+        "@srinivasiyc ",
+        "#COVIDEmergency ",
+        "#IndiaNeedsOxygen ",
+    ],
+    "Mumbai": [
+        "#Mumbai ",
+        "#CovidIndiaInfo " "#Covid19IndiaHelp ",
+        "#IndiaNeedsOxygen ",
+    ],
+    "Other": [
+        "#CovidIndiaInfo " "#Covid19IndiaHelp ",
+        "#IndiaNeedsOxygen ",
+    ],
+}
 WILD_CARDS = [
     "patient_name",
     "patient_age",
@@ -11,9 +50,11 @@ WILD_CARDS = [
     "current_spo2_level",
     "attendant_name",
     "attendant_contact_number",
-    "address",
+    "plasma_service",
+    "other_city",
 ]
-TWEET_FORMAT = "Patient Name: patient_name\nPatient age: patient_age\nLocation: location\nService Required: service_required\nCurrent SpO2: current_spo2_level\nAttendant Name: attendant_name\nContact Number: attendant_contact_number\nAddress: address\n#HelpingIndiaBreathe\n**Automated using https://"
+TWEET_FORMAT = "***TEST.Pls ignore***\nPls Help:\nPatient Name: patient_name\nAge: patient_age\nLoc: location\nService Req: service_required\nSpO2: current_spo2_level\nAttendant Name: attendant_name\nContact#: attendant_contact_number\n"
+TWEET_FOOTER = "**Automated using https://"
 
 
 def get_env_var_from_os(env_var_name):
@@ -46,6 +87,17 @@ def get_mandatory_env_variables():
     return got_all_env_vars
 
 
+def add_custom_hashtags_by_location(location: str):
+    custom_tags_by_loc = "#HelpingIndiaBreathe "
+
+    if location:
+        hashtags_by_loc = HASH_TAGS_BY_LOCATION[location]
+        for each_hashtag in hashtags_by_loc:
+            custom_tags_by_loc += each_hashtag
+
+    return custom_tags_by_loc
+
+
 def post_a_tweet(info_to_tweet):
     tweet_post_url = None
     public_tweets = None
@@ -68,32 +120,50 @@ def post_a_tweet(info_to_tweet):
     api = tweepy.API(auth)
 
     tweet_to_post = TWEET_FORMAT
+    loc_specific_info = None
 
     for each_wild_card in WILD_CARDS:
-        tweet_to_post = tweet_to_post.replace(
-            each_wild_card, info_to_tweet[each_wild_card]
-        )
 
-    """tweet_patient_name = TWEET_FORMAT.replace(
-        "<PATIENT_NAME>", info_to_tweet["patient_name"]
-    )
-    tweet_patient_age = tweet_patient_name.replace(
-        "<PATIENT_AGE>", info_to_tweet["patient_age"]
-    )"""
+        if ("other_city" in info_to_tweet) and (each_wild_card == "other_city"):
+            other_city_chosen = str(info_to_tweet[each_wild_card])
+            tweet_to_post = tweet_to_post.replace(
+                "location", str(info_to_tweet[each_wild_card])
+            )
 
-    print("Tweet after replacing patient name and age:" + str(tweet_to_post))
+        if each_wild_card in info_to_tweet:
+            tweet_to_post = tweet_to_post.replace(
+                each_wild_card, str(info_to_tweet[each_wild_card])
+            )
 
-    tweet_post_response = api.update_status(status=tweet_to_post)
-    print("type tweet_post_response: " + str(type(tweet_post_response)))
-    print("tweet_post_response: " + str(tweet_post_response))
+        if ("plasma_service" in info_to_tweet) and (each_wild_card == "plasma_service"):
+            plasma_blood_group_chosen = str(info_to_tweet[each_wild_card])
+            if plasma_blood_group_chosen:
+                tweet_to_post += "Blood Group: " + plasma_blood_group_chosen + " \n"
+
+        if ("location" in info_to_tweet) and (each_wild_card == "location"):
+            location_chosen = str(info_to_tweet[each_wild_card])
+            loc_specific_info = add_custom_hashtags_by_location(location_chosen)
+
+    if loc_specific_info:
+        tweet_to_post += loc_specific_info
+
+    tweet_to_post = str(tweet_to_post)
+    print("Tweet length:" + str(len(tweet_to_post)))
+    print("Tweet after replacing patient name and age:" + tweet_to_post)
+
+    """tweet_post_response = api.update_status(status=tweet_to_post)
+    # print("type tweet_post_response: " + str(type(tweet_post_response)))
+    # print("tweet_post_response: " + str(tweet_post_response))
     if tweet_post_response:
         tweet_post_json = tweet_post_response._json
         tweet_post_entities = tweet_post_json["entities"]
         tweet_post_urls = tweet_post_entities["urls"]
         tweet_post_url = tweet_post_urls[0]["url"]
 
-    """public_tweets = api.home_timeline()
-    for tweet in public_tweets:
-        print(tweet.text)"""
+    return tweet_post_url, tweet_to_post"""
+    return None, None
 
-    return tweet_post_url, tweet_to_post
+
+def get_all_tweets_by_hashtag(hash_tag_name: str):
+    if hash_tag_name:
+        return True
