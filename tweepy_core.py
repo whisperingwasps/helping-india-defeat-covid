@@ -139,13 +139,13 @@ def post_a_tweet(info_to_tweet):
             location_chosen = str(info_to_tweet[each_wild_card])
             loc_specific_info = add_custom_hashtags_by_location(location_chosen)
 
-    if loc_specific_info:
-        tweet_to_post += loc_specific_info
-
     if ("other_city" in info_to_tweet) and (each_wild_card == "other_city"):
         tweet_to_post += TWEET_OTHER_CITY_DETAIL.replace(
             each_wild_card, str(info_to_tweet[each_wild_card])
         )
+
+        if loc_specific_info:
+            tweet_to_post += loc_specific_info
 
     tweet_to_post = str(tweet_to_post)
     print("Tweet length:" + str(len(tweet_to_post)))
