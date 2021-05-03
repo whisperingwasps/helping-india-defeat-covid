@@ -53,7 +53,7 @@ WILD_CARDS = [
     "plasma_service",
     "other_city",
 ]
-TWEET_FORMAT = "Pls Help:\nPatient Name: patient_name\nAge: patient_age\nLoc: location\nService Req: service_required\nSpO2: current_spo2_level\nAttendant Name: attendant_name\nContact#: attendant_contact_number\n"
+TWEET_FORMAT = "Please extend help to:\nPatient Name: patient_name\nAge: patient_age\nLoc: location\nService Req: service_required\nSpO2: current_spo2_level\nAttendant Name: attendant_name\nContact#: attendant_contact_number\n"
 TWEET_FOOTER = "**Automated using https://"
 
 
