@@ -151,7 +151,7 @@ def post_a_tweet(info_to_tweet):
     print("Tweet length:" + str(len(tweet_to_post)))
     print("Tweet after replacing patient name and age:" + tweet_to_post)
 
-    """tweet_post_response = api.update_status(status=tweet_to_post)
+    tweet_post_response = api.update_status(status=tweet_to_post)
     # print("type tweet_post_response: " + str(type(tweet_post_response)))
     # print("tweet_post_response: " + str(tweet_post_response))
     if tweet_post_response:
@@ -160,8 +160,8 @@ def post_a_tweet(info_to_tweet):
         tweet_post_urls = tweet_post_entities["urls"]
         tweet_post_url = tweet_post_urls[0]["url"]
 
-    return tweet_post_url, tweet_to_post"""
-    return None, None
+    return tweet_post_url, tweet_to_post
+   #return None, None
 
 
 def get_all_tweets_by_hashtag(hash_tag_name: str):
