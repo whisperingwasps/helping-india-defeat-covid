@@ -3,7 +3,7 @@ import tweepy
 import os
 import sys
 
-HASH_TAGS_BY_LOCATION = {
+HASH_TAGS_BY_LOCATION: dict = {
     "Bengaluru": [
         "#Bangalore ",
         "#BengaluruSOS ",
@@ -53,7 +53,8 @@ WILD_CARDS = [
     "plasma_service",
     "other_city",
 ]
-TWEET_FORMAT = "***TEST.Pls ignore***\nPls Help:\nPatient Name: patient_name\nAge: patient_age\nLoc: location\nService Req: service_required\nSpO2: current_spo2_level\nAttendant Name: attendant_name\nContact#: attendant_contact_number\n"
+TWEET_FORMAT: str = "***TEST.Pls ignore***\nPls Help:\nPatient Name: patient_name\nAge: patient_age\nLoc: location\nService Req: service_required\nSpO2: current_spo2_level\nAttendant Name: attendant_name\nContact#: attendant_contact_number\n"
+TWEET_OTHER_CITY_DETAIL: str = " Other City: other_city"
 TWEET_FOOTER = "**Automated using https://"
 
 
@@ -124,12 +125,6 @@ def post_a_tweet(info_to_tweet):
 
     for each_wild_card in WILD_CARDS:
 
-        if ("other_city" in info_to_tweet) and (each_wild_card == "other_city"):
-            other_city_chosen = str(info_to_tweet[each_wild_card])
-            tweet_to_post = tweet_to_post.replace(
-                "location", str(info_to_tweet[each_wild_card])
-            )
-
         if each_wild_card in info_to_tweet:
             tweet_to_post = tweet_to_post.replace(
                 each_wild_card, str(info_to_tweet[each_wild_card])
@@ -147,11 +142,16 @@ def post_a_tweet(info_to_tweet):
     if loc_specific_info:
         tweet_to_post += loc_specific_info
 
+    if ("other_city" in info_to_tweet) and (each_wild_card == "other_city"):
+        tweet_to_post += TWEET_OTHER_CITY_DETAIL.replace(
+            each_wild_card, str(info_to_tweet[each_wild_card])
+        )
+
     tweet_to_post = str(tweet_to_post)
     print("Tweet length:" + str(len(tweet_to_post)))
     print("Tweet after replacing patient name and age:" + tweet_to_post)
 
-    """tweet_post_response = api.update_status(status=tweet_to_post)
+    tweet_post_response = api.update_status(status=tweet_to_post)
     # print("type tweet_post_response: " + str(type(tweet_post_response)))
     # print("tweet_post_response: " + str(tweet_post_response))
     if tweet_post_response:
@@ -160,8 +160,8 @@ def post_a_tweet(info_to_tweet):
         tweet_post_urls = tweet_post_entities["urls"]
         tweet_post_url = tweet_post_urls[0]["url"]
 
-    return tweet_post_url, tweet_to_post"""
-    return None, None
+    return tweet_post_url, tweet_to_post
+    # return None, None
 
 
 def get_all_tweets_by_hashtag(hash_tag_name: str):

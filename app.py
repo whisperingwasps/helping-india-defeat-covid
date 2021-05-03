@@ -142,6 +142,8 @@ def ask_for_help_page():
         if len(session_state.contact_number) < 10:
             st.error("Attendant Contact Number is invalid. Please check and re-submit.")
 
+        elif len(session_state.other_city) < 3:
+            st.error("Please enter a valid city name")
         elif len(session_state.city) < 3:
             st.error("Please enter a valid city name")
         elif len(session_state.patient_name) < 3:
